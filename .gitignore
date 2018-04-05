@@ -1,0 +1,11 @@
+# Object Files
+*.o
+*.ko
+
+# Other stuff
+*.cmd
+*.mod.c
+testpa3
+.tmp_versions/
+Module.symvers
+modules.order
