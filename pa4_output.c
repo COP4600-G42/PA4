@@ -6,8 +6,8 @@
 #include <linux/mutex.h>
 #include <linux/uaccess.h>
 
-#define CLASS_NAME    "pa3_output_class"
-#define DEVICE_NAME   "pa3_output"
+#define CLASS_NAME    "pa4_output_class"
+#define DEVICE_NAME   "pa4_output"
 #define BUFFER_LENGTH 1024
 
 MODULE_LICENSE("GPL");
@@ -24,12 +24,12 @@ static int dev_release(struct inode *, struct file *);
 
 /* GLOBAL VARIABLES */
 static int majorNumber;
-static struct class *pa3OutputClass = NULL;
-static struct device *pa3OutputDevice = NULL;
+static struct class *pa4OutputClass = NULL;
+static struct device *pa4OutputDevice = NULL;
 static int numberOfOpens = 0;
 
 /* MUTEX LOCK */
-extern struct mutex pa3_mutex;
+extern struct mutex pa4_mutex;
 
 /* EXTERNAL VARIABLES */
 extern int messageLen;
@@ -44,73 +44,73 @@ static struct file_operations fops =
 
 int init_module(void)
 {
-    printk(KERN_INFO "PA3 OUTPUT: Initializing module.\n");
+    printk(KERN_INFO "PA4 OUTPUT: Initializing module.\n");
 
     majorNumber = register_chrdev(0, DEVICE_NAME, &fops);
 
     if (majorNumber < 0)
     {
-        printk(KERN_ALERT "PA3 OUTPUT: Failed to register a major number.\n");
+        printk(KERN_ALERT "PA4 OUTPUT: Failed to register a major number.\n");
 
         return majorNumber;
     }
 
-    printk(KERN_INFO "PA3 OUTPUT: Registered with major number %d.\n", majorNumber);
+    printk(KERN_INFO "PA4 OUTPUT: Registered with major number %d.\n", majorNumber);
 
-    pa3OutputClass = class_create(THIS_MODULE, CLASS_NAME);
+    pa4OutputClass = class_create(THIS_MODULE, CLASS_NAME);
 
-    if (IS_ERR(pa3OutputClass))
+    if (IS_ERR(pa4OutputClass))
     {
         unregister_chrdev(majorNumber, DEVICE_NAME);
 
-        printk(KERN_ALERT "PA3 OUTPUT: Failed to register a class.\n");
+        printk(KERN_ALERT "PA4 OUTPUT: Failed to register a class.\n");
 
-        return PTR_ERR(pa3OutputClass);
+        return PTR_ERR(pa4OutputClass);
     }
 
-    printk(KERN_INFO "PA3 OUTPUT: Device class registered.\n");
+    printk(KERN_INFO "PA4 OUTPUT: Device class registered.\n");
 
-    pa3OutputDevice = device_create(pa3OutputClass, NULL, MKDEV(majorNumber, 0), NULL, DEVICE_NAME);
+    pa4OutputDevice = device_create(pa4OutputClass, NULL, MKDEV(majorNumber, 0), NULL, DEVICE_NAME);
 
-    if (IS_ERR(pa3OutputDevice))
+    if (IS_ERR(pa4OutputDevice))
     {
-        class_destroy(pa3OutputClass);
+        class_destroy(pa4OutputClass);
         unregister_chrdev(majorNumber, DEVICE_NAME);
 
-        printk(KERN_ALERT "PA3 OUTPUT: Failed to create device.\n");
+        printk(KERN_ALERT "PA4 OUTPUT: Failed to create device.\n");
 
-        return PTR_ERR(pa3OutputDevice);
+        return PTR_ERR(pa4OutputDevice);
     }
 
-    printk(KERN_INFO "PA3 OUTPUT: Device created successfully.\n");
+    printk(KERN_INFO "PA4 OUTPUT: Device created successfully.\n");
 
     return 0;
 }
 
 void cleanup_module(void)
 {
-    device_destroy(pa3OutputClass, MKDEV(majorNumber, 0));
-    class_unregister(pa3OutputClass);
-    class_destroy(pa3OutputClass);
+    device_destroy(pa4OutputClass, MKDEV(majorNumber, 0));
+    class_unregister(pa4OutputClass);
+    class_destroy(pa4OutputClass);
     unregister_chrdev(majorNumber, DEVICE_NAME);
 
-    printk(KERN_INFO "PA3 OUTPUT: Removing module.\n");
+    printk(KERN_INFO "PA4 OUTPUT: Removing module.\n");
 }
 
 static int dev_open(struct inode *inodep, struct file *filep)
 {
-    printk(KERN_INFO "\nPA3 OUTPUT: OPEN Full string: %s\n", message);
+    printk(KERN_INFO "\nPA4 OUTPUT: OPEN Full string: %s\n", message);
 
-    if (!mutex_trylock(&pa3_mutex))
+    if (!mutex_trylock(&pa4_mutex))
     {
-        printk(KERN_ALERT "PA3 OUTPUT: Device already in use by another process.\n");
+        printk(KERN_ALERT "PA4 OUTPUT: Device already in use by another process.\n");
 
         return -EBUSY;
     }
 
     numberOfOpens++;
 
-    printk(KERN_INFO "PA3 OUTPUT: Device has been opened %d time(s).\n", numberOfOpens);
+    printk(KERN_INFO "PA4 OUTPUT: Device has been opened %d time(s).\n", numberOfOpens);
 
     return 0;
 }
@@ -121,7 +121,7 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
     int i = 0;
     int stringLen = messageLen;
 
-    printk(KERN_INFO "\nPA3 OUTPUT: READ Full string: %s\n", message);
+    printk(KERN_INFO "\nPA4 OUTPUT: READ Full string: %s\n", message);
 
     // If the requested read length is more than the available space
     // Then reduce the read length to the maximum available
@@ -146,13 +146,13 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
     if (errorCount == 0)
     {
-        printk(KERN_INFO "PA3 OUTPUT: Sent %d characters to the user.\n", len);
+        printk(KERN_INFO "PA4 OUTPUT: Sent %d characters to the user.\n", len);
 
-        printk(KERN_INFO "PA3 OUTPUT: READ Full string: %s\n", message);
+        printk(KERN_INFO "PA4 OUTPUT: READ Full string: %s\n", message);
 
         return len;
     } else {
-        printk(KERN_INFO "PA3 OUTPUT: Failed to send %d characters to the user.\n", errorCount);
+        printk(KERN_INFO "PA4 OUTPUT: Failed to send %d characters to the user.\n", errorCount);
 
         return -EFAULT;
     }
@@ -160,11 +160,11 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
 static int dev_release(struct inode *inodep, struct file *filep)
 {
-    mutex_unlock(&pa3_mutex);
+    mutex_unlock(&pa4_mutex);
 
-    printk(KERN_INFO "\nPA3 OUTPUT: RELEASE Full string: %s\n", message);
+    printk(KERN_INFO "\nPA4 OUTPUT: RELEASE Full string: %s\n", message);
 
-    printk(KERN_INFO "PA3 OUTPUT: Device successfully closed.\n");
+    printk(KERN_INFO "PA4 OUTPUT: Device successfully closed.\n");
 
     return 0;
 }

@@ -9,27 +9,27 @@
 
 int deviceRead(char *message, char *messageLength)
 {
-    int outputDevice = open("/dev/pa3_output", O_RDWR);
+    int outputDevice = open("/dev/pa4_output", O_RDWR);
     int returnValue, receiveLength;
 
     if (outputDevice < 0)
     {
-        perror("TESTPA3: Failed to open the output device.\n");
+        perror("TESTPA4: Failed to open the output device.\n");
 
         return errno;
     }
 
     message = calloc(BUFFER_LENGTH, sizeof(char));
 
-    printf("TESTPA3: How many bytes would you like to read?\n");
-    printf("TESTPA3: %s", message);
+    printf("TESTPA4: How many bytes would you like to read?\n");
+    printf("TESTPA4: %s", message);
 
     fgets(messageLength, BUFFER_LENGTH, stdin);
     receiveLength = atoi(messageLength);
 
     returnValue = read(outputDevice, message, receiveLength);
 
-    printf("TESTPA3: %s\n", message);
+    printf("TESTPA4: %s\n", message);
 
     free(message);
     message = NULL;
@@ -39,18 +39,18 @@ int deviceRead(char *message, char *messageLength)
 
 int deviceWrite(char *stringToSend)
 {
-    int inputDevice  = open("/dev/pa3_input", O_RDWR);
+    int inputDevice  = open("/dev/pa4_input", O_RDWR);
     int returnValue, stringLength;
 
     if (inputDevice < 0)
     {
-        perror("TESTPA3: Failed to open the input device.\n");
+        perror("TESTPA4: Failed to open the input device.\n");
 
         return errno;
     }
 
-    printf("TESTPA3: Enter a string to write:\n");
-    printf("TESTPA3: ");
+    printf("TESTPA4: Enter a string to write:\n");
+    printf("TESTPA4: ");
 
     fgets(stringToSend, BUFFER_LENGTH, stdin);
     strtok(stringToSend, "\n");
@@ -74,12 +74,12 @@ int main(void)
     stringToSend  = malloc(sizeof(char) * BUFFER_LENGTH);
     messageLength = malloc(sizeof(char) * BUFFER_LENGTH);
 
-    printf("TESTPA3: Type W to write.\n");
-    printf("TESTPA3: Type R to read.\n");
-    printf("TESTPA3: Type Q to quit.\n");
+    printf("TESTPA4: Type W to write.\n");
+    printf("TESTPA4: Type R to read.\n");
+    printf("TESTPA4: Type Q to quit.\n");
 
     do {
-        printf("TESTPA3: What do you want to do? ");
+        printf("TESTPA4: What do you want to do? ");
         inputChoice = getchar();
 
         // Clear the stdin buffer
@@ -97,10 +97,10 @@ int main(void)
                 break;
             case 'q':
             case 'Q':
-                printf("TESTPA3: Bye-bye.\n");
+                printf("TESTPA4: Bye-bye.\n");
                 break;
             default:
-                printf("TESTPA3: Invalid input option.\n");
+                printf("TESTPA4: Invalid input option.\n");
                 break;
         }
     } while (inputChoice != 'Q' && inputChoice != 'q');
