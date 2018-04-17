@@ -28,6 +28,7 @@ static struct class *pa4InputClass = NULL;
 static struct device *pa4InputDevice = NULL;
 static int numberOfOpens = 0;
 static char receivedMessage[BUFFER_LENGTH] = {0};
+static char rewrittenMessage[BUFFER_LENGTH] = {0};
 
 /* MUTEX LOCK */
 struct mutex pa4_mutex;
@@ -126,8 +127,10 @@ static int dev_open(struct inode *inodep, struct file *filep)
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset)
 {
     int errorCount = 0;
-    int i = 0;
+    int i = 0, k=0, j=0;
     int startLen = messageLen;
+    int ucfCount=0;
+    char * replace = "ndefeated 2018 National Champions UCF" //38 chars
 
 
     printk(KERN_INFO "\nPA4  INPUT: WRITE Full string: %s\n", message);
@@ -156,9 +159,51 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
             break;
         }
 
-        message[startLen] = receivedMessage[i];
-        startLen++;
+                if (receivedMessage[i]=="U")
+                {
+                    message[startLen] = receivedMessage[i];
+                    startLen++;
+
+                    if(i+2<= len)
+                    {    
+                        if (receivedMessage[i+1]=="C" && receivedMessage[i+2]=="F") 
+                        {
+                            if (startLen+37 <= BUFFER_LENGTH)
+                             {
+                                //write whole U  ndefeated 2018 National Champions UCF//36 chars
+                                for (k=0;k<37;k++)
+                                {   
+                                   message[startLen] = replace[k] ;
+                                   startLen++;
+                                }
+          
+                             }  
+                             else if (startLen+37 > BUFFER_LENGTH  )
+                             {
+                                //means you can write partial 
+                                m= BUFFER_LENGTH -startLen;
+                                for (j=0;j<m;j++)
+                                {   
+                                   message[startLen] = replace[j] ;
+                                   startLen++;
+                                }
+
+                             }   
+                        }
+                    }    
+                }
+
+                else
+                {
+                    message[startLen] = receivedMessage[i];
+                    startLen++;
+
+
+                }    
+    
     }
+
+    
 
     printk(KERN_INFO "PA4  INPUT: Received %zu characters from the user.\n", len);
 
