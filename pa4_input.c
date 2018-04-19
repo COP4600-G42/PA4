@@ -134,22 +134,9 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
 
     printk(KERN_INFO "\nPA4  INPUT: WRITE Full string: %s\n", message);
 
-    // If the requested write length is more than the available space
-    // Then reduce the write length to the maximum available
-    // Else use the requested write length
-    // if  ((len + messageLen) > BUFFER_LENGTH)
-    // {
-        // len = BUFFER_LENGTH - messageLen;
-        // messageLen = BUFFER_LENGTH;
-    // } else {
-        // messageLen += len;
-    // }
-
     startLen = messageLen;
 
     errorCount = copy_from_user(receivedMessage, buffer, len);
-
-    // printk(KERN_INFO"PA4  INPUT: before the loop i = %d, startLen = %d, len = %d, messageLen = %d\n", i, startLen, len, messageLen);
 
     for (i = 0; i < len; i++)
     {
