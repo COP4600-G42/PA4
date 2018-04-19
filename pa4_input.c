@@ -127,28 +127,29 @@ static int dev_open(struct inode *inodep, struct file *filep)
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset)
 {
     int errorCount = 0;
-    int i = 0, k=0, j=0, m=0;
-    int startLen = messageLen;
-   
-    char * replace = "ndefeated 2018 National Champions UCF"; //38 chars
+    int i = 0, j = 0, m = 0;
+    int startLen;
 
+    char *replace = "Undefeated 2018 National Champions UCF"; //38 chars
 
     printk(KERN_INFO "\nPA4  INPUT: WRITE Full string: %s\n", message);
 
     // If the requested write length is more than the available space
     // Then reduce the write length to the maximum available
     // Else use the requested write length
-    if  ((len + messageLen) > BUFFER_LENGTH)
-    {
-        len = BUFFER_LENGTH - messageLen;
-        messageLen = BUFFER_LENGTH;
-    } else {
-        messageLen += len;
-    }
+    // if  ((len + messageLen) > BUFFER_LENGTH)
+    // {
+        // len = BUFFER_LENGTH - messageLen;
+        // messageLen = BUFFER_LENGTH;
+    // } else {
+        // messageLen += len;
+    // }
+
+    startLen = messageLen;
 
     errorCount = copy_from_user(receivedMessage, buffer, len);
 
-    printk(KERN_INFO"PA4  INPUT: before the loop i = %d, startLen = %d, len = %d, messageLen = %d\n", i, startLen, len, messageLen);
+    // printk(KERN_INFO"PA4  INPUT: before the loop i = %d, startLen = %d, len = %d, messageLen = %d\n", i, startLen, len, messageLen);
 
     for (i = 0; i < len; i++)
     {
@@ -159,54 +160,30 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
             break;
         }
 
-                if (receivedMessage[i]=='U')
-                {
-                    message[startLen] = receivedMessage[i];
-                    startLen++;
+        if ((i + 2) <= len && receivedMessage[i] == 'U' && receivedMessage[i + 1] == 'C' && receivedMessage[i + 2] == 'F')
+        {
+            i = i + 2;
 
-                    if(i+2<= len)
-                    {    
-                        if (receivedMessage[i+1]=='C' && receivedMessage[i+2]=='F') 
-                        {   
-                             i= i+2;
-                            if (startLen+37 <= BUFFER_LENGTH)
-                             {
-                                //write whole U  ndefeated 2018 National Champions UCF//36 chars
-                                for (k=0;k<37;k++)
-                                {   
-                                   message[startLen] = replace[k] ;
-                                   startLen++;
-                                }
-          
-                             }  
-                             else if (startLen+37 > BUFFER_LENGTH  )
-                             {
-                                //means you can write partial 
-                                m= BUFFER_LENGTH -startLen;
-                                for (j=0;j< m;j++)
-                                {   
-                                   message[startLen] = replace[j] ;
-                                   startLen++;
-                                }
+            m = (BUFFER_LENGTH - startLen) < 38 ? (BUFFER_LENGTH - startLen) : 38;
 
-                             }   
-                        }
-                    }    
-                }
-
-                else
-                {
-                    message[startLen] = receivedMessage[i];
-                    startLen++;
-
-
-                }    
-    
+            for (j = 0; j < m; j++)
+            {
+                message[startLen] = replace[j];
+                startLen++;
+                messageLen++;
+            }
+        }
+        else
+        {
+            message[startLen] = receivedMessage[i];
+            startLen++;
+            messageLen++;
+        }
     }
 
-    
-
     printk(KERN_INFO "PA4  INPUT: Received %zu characters from the user.\n", len);
+
+    printk(KERN_INFO "PA4  INPUT: Current message length: %d\n", messageLen);
 
     printk(KERN_INFO "PA4  INPUT: WRITE Full string: %s\n", message);
 
@@ -219,7 +196,7 @@ static int dev_release(struct inode *inodep, struct file *filep)
 
     printk(KERN_INFO "\nPA4  INPUT: RELEASE Full string: %s\n", message);
 
-    printk(KERN_INFO "PA4  INPUT: Device successfully closed.\n");
+    printk(KERN_INFO "PA4  INPUT: Device successfully closed.\n\n");
 
     return 0;
 }
