@@ -148,6 +148,8 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
     {
         printk(KERN_INFO "PA4 OUTPUT: Sent %d characters to the user.\n", len);
 
+        printk(KERN_INFO "PA4 OUTPUT: Current message length: %d\n", messageLen);
+
         printk(KERN_INFO "PA4 OUTPUT: READ Full string: %s\n", message);
 
         return len;
